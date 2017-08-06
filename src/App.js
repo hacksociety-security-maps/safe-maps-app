@@ -167,26 +167,28 @@ class Body extends Component{
         myStateJson : myJson
       })
     })
-    var map = this.props.google.maps.Map(document.getElementById('map'), {
-      zoom: 3,
-      center: {lat: 0, lng: -180},
-      mapTypeId: 'terrain'
-    });
+    console.log(this.state.myStateJson)
+    // var map = this.props.google.maps.Map(document.getElementById('map'), {
+    //   zoom: 3,
+    //   center: {lat: 0, lng: -180},
+    //   mapTypeId: 'terrain'
+    // });
 
 
-    var flightPath = this.props.google.maps.Polyline({
-          path: this.props.steps,
-          geodesic: true,
-          strokeColor: '#FF0000',
-          strokeOpacity: 1.0,
-          strokeWeight: 2
-        });
+    // var flightPath = this.props.google.maps.Polyline({
+    //       path: this.props.steps,
+    //       geodesic: true,
+    //       strokeColor: '#FF0000',
+    //       strokeOpacity: 1.0,
+    //       strokeWeight: 2
+    //     });
 
-    flightPath.setMap(map);
+    // flightPath.setMap(map);
 
 
   }
   render(){
+
     return(
       <div>
         <NavBar />
@@ -199,7 +201,13 @@ class Body extends Component{
           lng: -74.0839427
           }}
         >
-        <div id="map"></div>
+    <Polygon
+          paths={[this.state.myStateJson]}
+          strokeColor="#ff0000"
+          strokeWeight={2}
+          fillColor="#fff"
+          fillOpacity={0} />
+    
         <Marker 
           onClick={()=> console.log('hi')}
           name={'Current location'} />                
