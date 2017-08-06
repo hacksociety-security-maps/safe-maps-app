@@ -27,7 +27,7 @@ class App extends Component {
       this.setState({
         screen: true
       })
-    }, 3000)    
+    }, 3000)
   }
   calculateRoute(){
     let request = {
@@ -75,7 +75,11 @@ class NavBar extends Component{
           <div className="nav-wrapper blue darken-3">
             <a href="#!" className="left brand-logo"><img id="logo-app" src={logo} alt="logo App" /></a>
             <ul className="right hide-on-med-and-down">
-              <li><a href="sass.html"><i className="material-icons">search</i></a></li>
+              <li>
+                <input id="search" type="search" required />
+                <label className="label-icon" htmlFor="search"><i className="material-icons">search</i></label>
+                <i className="material-icons">close</i>                
+              </li>
               <li><a href="collapsible.html"><i className="material-icons">refresh</i></a></li>
               <li><a href="mobile.html"><i className="material-icons">more_vert</i></a></li>
             </ul>
