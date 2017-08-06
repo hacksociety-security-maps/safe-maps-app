@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.png';
 import './App.css';
-import {Map, InfoWindow, HeatMap, Marker, Polygon, GoogleApiWrapper} from 'google-maps-react'
+import {Map, InfoWindow, HeatMap, Marker, Polygon, Polyline, GoogleApiWrapper} from 'google-maps-react'
 import * as firebase from "firebase"
 
 var config = {
@@ -168,24 +168,6 @@ class Body extends Component{
       })
     })
     console.log(this.state.myStateJson)
-    // var map = this.props.google.maps.Map(document.getElementById('map'), {
-    //   zoom: 3,
-    //   center: {lat: 0, lng: -180},
-    //   mapTypeId: 'terrain'
-    // });
-
-
-    // var flightPath = this.props.google.maps.Polyline({
-    //       path: this.props.steps,
-    //       geodesic: true,
-    //       strokeColor: '#FF0000',
-    //       strokeOpacity: 1.0,
-    //       strokeWeight: 2
-    //     });
-
-    // flightPath.setMap(map);
-
-
   }
   render(){
 
@@ -201,7 +183,7 @@ class Body extends Component{
           lng: -74.0839427
           }}
         >
-    <Polygon
+      <Polygon
           paths={[this.state.myStateJson]}
           strokeColor="#ff0000"
           strokeWeight={2}
