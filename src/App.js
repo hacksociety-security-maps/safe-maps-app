@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.png';
 import './App.css';
-import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react'
+import {Map, InfoWindow, HeatMap, Marker, Polygon, GoogleApiWrapper} from 'google-maps-react'
 import * as firebase from "firebase"
 
 var config = {
@@ -14,47 +14,42 @@ var config = {
 };
 firebase.initializeApp(config);
 
-const locations = [
-        {lat: -31.563910, lng: 147.154312},
-        {lat: -33.718234, lng: 150.363181},
-        {lat: -33.727111, lng: 150.371124},
-        {lat: -33.848588, lng: 151.209834},
-        {lat: -33.851702, lng: 151.216968},
-        {lat: -34.671264, lng: 150.863657},
-        {lat: -35.304724, lng: 148.662905},
-        {lat: -36.817685, lng: 175.699196},
-        {lat: -36.828611, lng: 175.790222},
-        {lat: -37.750000, lng: 145.116667},
-        {lat: -37.759859, lng: 145.128708},
-        {lat: -37.765015, lng: 145.133858},
-        {lat: -37.770104, lng: 145.143299},
-        {lat: -37.773700, lng: 145.145187},
-        {lat: -37.774785, lng: 145.137978},
-        {lat: -37.819616, lng: 144.968119},
-        {lat: -38.330766, lng: 144.695692},
-        {lat: -39.927193, lng: 175.053218},
-        {lat: -41.330162, lng: 174.865694},
-        {lat: -42.734358, lng: 147.439506},
-        {lat: -42.734358, lng: 147.501315},
-        {lat: -42.735258, lng: 147.438000},
-        {lat: -43.999792, lng: 170.463352}
-      ]
-
 class App extends Component {
   constructor(props){
     super(props)
     this.state = {
-      screen: null
+      screen: null,
+      steps: []
     }
     this.calculateRoute = this.calculateRoute.bind(this)
   }
   componentDidMount(){
+
+    let database = firebase.database().ref('users')
+    database.on('value', this.gotData, this.errData)
+
     setTimeout(() => {
       this.setState({
         screen: true
       })
     }, 3000)
   }
+	gotData = (data) => {
+			let getData = data.val()
+			let testKeys = Object.keys(getData)
+			for (var i = 0 ; i < testKeys.length; i++){
+				let myTest = testKeys[i]
+        let myUsers = getData[myTest]
+        this.setState({
+          steps: myUsers.legs[0].steps
+        })
+
+      }		
+      
+	}
+	errData = (err) => {
+		console.log("Error! " + err)
+	}  
   calculateRoute(){
     let request = {
       origin: 0
@@ -65,7 +60,8 @@ class App extends Component {
     if(!this.state.screen){
       isReady = <Preloader />
     }else{
-      isReady = <Body google={this.props.google}/>
+      isReady = <Body google={this.props.google}
+                      steps={this.state.steps}/>
     }
       return (
         <div className="App">
@@ -115,16 +111,87 @@ class NavBar extends Component{
   }
 }
 
+class BtnRight extends Component{
+  render(){
+    return(
+
+      <div className="fixed-action-btn horizontal">
+        <a className="btn-floating btn-large red">
+          <i className="large material-icons">add</i>
+        </a>
+        <ul>
+          <li><a className="btn-floating red"><i className="material-icons">search</i></a></li>
+        </ul>
+      </div>
+
+    )
+  }
+}
+
+const polygon = [
+      { lat: 37.789411, lng: -122.422116 },
+      { lat: 37.785757, lng: -122.421333 },
+      { lat: 37.789352, lng: -122.415346 }
+    ]
+
+    var gradient = [
+      'rgba(0, 255, 255, 0)',
+      'rgba(0, 255, 255, 1)',
+      'rgba(0, 191, 255, 1)',
+      'rgba(0, 127, 255, 1)',
+      'rgba(0, 63, 255, 1)',
+      'rgba(0, 0, 255, 1)',
+      'rgba(0, 0, 223, 1)',
+      'rgba(0, 0, 191, 1)',
+      'rgba(0, 0, 159, 1)',
+      'rgba(0, 0, 127, 1)',
+      'rgba(63, 0, 91, 1)',
+      'rgba(127, 0, 63, 1)',
+      'rgba(191, 0, 31, 1)',
+      'rgba(255, 0, 0, 1)'
+    ];
+
 class Body extends Component{
+  state = {
+    myStateJson: []
+  }
+
+
   componentDidMount(){
     let labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    console.log(locations)   
+    let myJson = []
+
+    this.props.steps.forEach((mystep) => {
+      myJson.push(mystep.end_location)
+      this.setState({
+        myStateJson : myJson
+      })
+    })
+    var map = this.props.google.maps.Map(document.getElementById('map'), {
+      zoom: 3,
+      center: {lat: 0, lng: -180},
+      mapTypeId: 'terrain'
+    });
+
+
+    var flightPath = this.props.google.maps.Polyline({
+          path: this.props.steps,
+          geodesic: true,
+          strokeColor: '#FF0000',
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+
+    flightPath.setMap(map);
+
+
   }
   render(){
     return(
       <div>
         <NavBar />
-        <Map 
+        <BtnRight />
+        <Map
           google={this.props.google} 
           zoom={14}
           initialCenter={{
@@ -132,6 +199,7 @@ class Body extends Component{
           lng: -74.0839427
           }}
         >
+        <div id="map"></div>
         <Marker 
           onClick={()=> console.log('hi')}
           name={'Current location'} />                
@@ -140,6 +208,14 @@ class Body extends Component{
     )
   }
 }
+
+          // <HeatMap 
+          //   gradient={gradient}
+          //   radius={20}
+          //   opacity={0.3}          
+          //   positions={[polygon]}
+          // />
+
 
 export default GoogleApiWrapper({
   apikey: ('AIzaSyBGY34YUQau2pq2Wfr-nA36eOIXXRezNXM')
